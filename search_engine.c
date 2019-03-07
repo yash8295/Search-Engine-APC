@@ -6,6 +6,26 @@
 //#include<iostream>
 #define base_url "www.chitkara.edu.in"
 //using namespace std;
+void extract_anchor_tags(char *html)
+{
+	int i,j=0;
+	for(i=0;html[i]!='\0';i++)
+	{
+		if(html[i]=='<'&&(html[i+1]=='a'||html[i+1]=='A'))
+		{
+			while(html[i]!='>')
+			{
+				html[j]=html[i];
+				i++;
+				j++;
+			}
+			html[j]=html[i];
+			j++;
+		}
+	}
+	html[j]='\0';
+	printf("%s",html);
+}
 void validate_url(char *seed_url)
 {
 	printf("%s\n",seed_url);
@@ -62,11 +82,38 @@ void downfile(char *target_dir,char *seed_url)
 	strcat(down_url,target_dir);
 	strcat(down_url," ");
 	strcat(down_url,seed_url);
-	char create_file[500]="cat index.txt | grep -Eo \"(http|https)://[a-zA-Z0-9./?=_-]*\" | grep -Ev '(*.jpg|*.css|*.js|*.png|*.php|*.gif|*.xml|*.ico|*noscript*|*.pdf)' | sort | uniq > ";
-	strcat(create_file,file_name);
+	//char create_file[500]="cat index.txt | grep -Eo \"(http|https)://[a-zA-Z0-9./?=_-]*\" | grep -Ev '(*.jpg|*.css|*.js|*.png|*.php|*.gif|*.xml|*.ico|*noscript*|*.pdf)' | sort | uniq > ";
+	//strcat(create_file,file_name);
 	system(down_url);
-	system(create_file);
-	system("rm index.txt");
+	//system(create_file);
+	//system("rm index.txt");
+	//printf("%s",html);
+}
+long int get_index_size()
+{
+	FILE *fp;
+	fp=fopen("index.txt","r");
+	fseek(fp,0L,SEEK_END);
+	long int html_size;
+	html_size=ftell(fp);
+	html_size++;
+	return html_size;
+	fclose(fp);
+}
+void Get_HTML_from_index(char *html)
+{
+	FILE *fp;
+	fp=fopen("index.txt","r");
+	long int i=0;
+	while((html[i++]=fgetc(fp))!=EOF)
+	{
+		if(html[i-1]=='\n'||html[i-1]==' '||html[i-1]=='\t')
+			i--;
+	}
+	html[i]='\0';
+	fclose(fp);
+	//printf("%s",html);
+	//return html_size;
 }
 main(int argc,char *argv[])
 {
@@ -80,5 +127,10 @@ main(int argc,char *argv[])
 	validate_url(seed_url);
 	validate_target_dir(target_dir);
 	downfile(target_dir,seed_url);
+	long int html_size=get_index_size();
+	char *html=(char *)malloc(html_size*sizeof(char));;
+	Get_HTML_from_index(html);
+//	printf("%s",html);
+	extract_anchor_tags(html);
 	printf("\n");
 }
